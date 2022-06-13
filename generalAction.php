@@ -79,9 +79,20 @@ if ($_POST['action']=="deleteDetailsList"){
         }
         $dataArr['SchoolList']=$subSchoolList;
     }
+    
+    if(in_array("ParentsList", $key)){
+        $sqlParents=$mfp->mf_query("SELECT iParentId as value,vName as label FROM parent WHERE eStatus='y'");
+        $subParentsList=array();
+        if($mfp->mf_affected_rows()>0){
+            while($row=$mfp->mf_fetch_array($sqlParents)){
+                $subParentsList[]=$row;
+            }
+        }
+        $dataArr['ParentsList']=$subParentsList;
+    }
 
     if(in_array("GenderList", $key)){
-        $sqlGender=$mfp->mf_query("SELECT vName as value,vName as label FROM dd_value WHERE iKeyId=2");
+        $sqlGender=$mfp->mf_query("SELECT iValueId as value,vName as label FROM dd_value WHERE iKeyId=2");
         $GenderList=array();      
         if($mfp->mf_affected_rows()>0){
             while($row=$mfp->mf_fetch_array($sqlGender)){
@@ -92,7 +103,7 @@ if ($_POST['action']=="deleteDetailsList"){
     }
 
     if(in_array("BloodGroupList", $key)){
-        $sqlBloodGroup=$mfp->mf_query("SELECT vName as value,vName as label FROM dd_value WHERE iKeyId=3");
+        $sqlBloodGroup=$mfp->mf_query("SELECT iValueId as value,vName as label FROM dd_value WHERE iKeyId=3");
         $BloodGroupList=array();      
         if($mfp->mf_affected_rows()>0){
             while($row=$mfp->mf_fetch_array($sqlBloodGroup)){

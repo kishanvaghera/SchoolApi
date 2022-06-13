@@ -35,5 +35,7 @@ if($_POST['action'] == "AddAttendance"){
     $iSectionId = $_POST['iSectionId'];
     $iMonth = $_POST['iMonth'];
     $iYear = $_POST['iYear'];
+
+    // $selAttend = $mfp->mf_query("");
 }
 ?>
