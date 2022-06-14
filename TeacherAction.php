@@ -8,7 +8,7 @@ if($_POST['action']=="AddEditTeacher"){
     $vTeacherMail=$_POST['vTeacherMail'];
     $vPass=$_POST['vPass'];
     $vDesignation=$_POST['vDesignation'];
-    $vDepartment=$_POST['vDepartment'];
+    $iDepartmentId=$_POST['iDepartmentId'];
     $vPhone=$_POST['vPhone'];
     $eGender=$_POST['eGender'];
     $eBloodGrp=$_POST['eBloodGrp'];
@@ -21,7 +21,7 @@ if($_POST['action']=="AddEditTeacher"){
     $insArr['vTeacherMail']=$vTeacherMail;
     $insArr['vPass']=$vPass;
     $insArr['vDesignation']=$vDesignation;
-    $insArr['vDepartment']=$vDepartment;
+    $insArr['vDepartment']=$iDepartmentId;
     $insArr['vPhone']=$vPhone;
     $insArr['eGender']=$eGender;
     $insArr['eBloodGrp']=$eBloodGrp;
@@ -55,28 +55,30 @@ if($_POST['action']=="AddEditTeacher"){
     $limit = $_POST['limit'];
     $page_index = ($page-1) * $limit;
 
-    $selectedField="SELECT iTeacherId as id,iTeacherId,vTeacherName,vDesignation,vDepartment";
-    $singleField="SELECT iTeacherId";
+    $selectedField="SELECT tech.iTeacherId as id,tech.iTeacherId,tech.vTeacherName,tech.vDesignation,dept.vDepartment";
+    $singleField="SELECT tech.iTeacherId";
 
-    $sql=" FROM teacher WHERE eStatus='y' AND iSchoolId=1 ";
+    $sql=" FROM teacher as tech 
+            LEFT JOIN department as dept ON dept.iDepartmentId=tech.vDepartment
+            WHERE tech.eStatus='y' AND tech.iSchoolId=1 ";
 
     if(!empty($searchString)){
-        $sql.=" AND (iTeacherId LIKE '%".$searchString."%' OR
-        vTeacherName LIKE '%".$searchString."%' OR
-        vDesignation LIKE '%".$searchString."%' OR
-        vDepartment LIKE '%".$searchString."%') ";
+        $sql.=" AND (tech.iTeacherId LIKE '%".$searchString."%' OR
+        tech.vTeacherName LIKE '%".$searchString."%' OR
+        tech.vDesignation LIKE '%".$searchString."%' OR
+        dept.vDepartment LIKE '%".$searchString."%') ";
     }
 
     if(!empty($extraFilter)){
         if($extraFilter['vTeacherName']!=""){
-            $sql.=" AND vTeacherName='".$extraFilter['vTeacherName']."'";
+            $sql.=" AND tech.vTeacherName='".$extraFilter['vTeacherName']."'";
         }
         if($extraFilter['iClassId']!=""){
-            $sql.=" AND iClassId=".$extraFilter['iClassId']."";
+            $sql.=" AND tech.iClassId=".$extraFilter['iClassId']."";
         }
     }
 
-    $sql.=" GROUP BY iTeacherId ";
+    $sql.=" GROUP BY tech.iTeacherId ";
     
     $sqlSingle=$mfp->mf_query($singleField.$sql);
     $totalSingleRows=$mfp->mf_affected_rows();

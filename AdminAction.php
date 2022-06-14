@@ -125,7 +125,7 @@ if ($_POST['action'] == "AddEditAdmin") {
 } else if ($_POST['action'] == "getAdminDetail") {
     $id = $_POST['id'];
 
-    $sql = $mfp->mf_query("SELECT * FROM users WHERE eStatus='y' AND iUserEmpId =" . $id . "");
+    $sql = $mfp->mf_query("SELECT iUserEmpId,vFirstName,vMiddleName,vLastName,vEmail,vMobileNo as vPhone,iSchoolId,iDDGenderId,iDDBloodGroupId,vAddress1 as vAddress FROM users WHERE eStatus='y' AND iUserEmpId =" . $id . "");
     if ($mfp->mf_affected_rows() > 0) {
         $row = $mfp->mf_fetch_array($sql);
         $retArr = array("status" => 200, "data" => $row);

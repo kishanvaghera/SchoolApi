@@ -20,6 +20,7 @@ if($_POST['action']=="addEditParent"){
     $insArr['vPhone']=$vPhone;
     $insArr['vPassword']=$vPassword;
     $insArr['eBloodGrp']=$eBloodGrp;
+    $insArr['iSchoolId']=1;
 
     $returnArr=array();
     if($iParentId>0){
