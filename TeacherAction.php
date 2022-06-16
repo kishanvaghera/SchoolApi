@@ -3,46 +3,63 @@ include ("includes/connect.php");
 
 if($_POST['action']=="AddEditTeacher"){
 
-    $iTeacherId=(int)$_POST['iTeacherId'];
-    $vTeacherName=$_POST['vTeacherName'];
-    $vTeacherMail=$_POST['vTeacherMail'];
-    $vPass=$_POST['vPass'];
-    $vDesignation=$_POST['vDesignation'];
+    $iUserEmpId=(int)$_POST['iUserEmpId'];
+    $vFirstName=$_POST['vFirstName'];
+    $vMiddleName=$_POST['vMiddleName'];
+    $vLastName=$_POST['vLastName'];
+    $vEmail=$_POST['vEmail'];
+    $vUserEmpPwd=$_POST['vUserEmpPwd'];
+    $iDesignationId=$_POST['iDesignationId'];
     $iDepartmentId=$_POST['iDepartmentId'];
-    $vPhone=$_POST['vPhone'];
-    $eGender=$_POST['eGender'];
-    $eBloodGrp=$_POST['eBloodGrp'];
-    $vAddress=$_POST['vAddress'];
+    $vMobileNo=$_POST['vMobileNo'];
+    $iDDGenderId=$_POST['iDDGenderId'];
+    $iDDBloodGroupId=$_POST['iDDBloodGroupId'];
+    $vAddress1=$_POST['vAddress1'];
     $vAbout=$_POST['vAbout'];
     $isShowWebsite=$_POST['isShowWebsite'];
 
+    $vFullName = '';
+    if($vFirstName!=""){
+        $vFullName .= ucfirst($vFirstName);
+    }
+    if($vMiddleName!=""){
+        $vFullName .= ' '.strtoupper(substr($vMiddleName, 0, 1)).'.';
+    }
+    if($vLastName!=""){
+        $vFullName .= ' '.ucfirst($vLastName);
+    }
+
     $insArr=array();
-    $insArr['vTeacherName']=$vTeacherName;
-    $insArr['vTeacherMail']=$vTeacherMail;
-    $insArr['vPass']=$vPass;
-    $insArr['vDesignation']=$vDesignation;
-    $insArr['vDepartment']=$iDepartmentId;
-    $insArr['vPhone']=$vPhone;
-    $insArr['eGender']=$eGender;
-    $insArr['eBloodGrp']=$eBloodGrp;
-    $insArr['vAddress']=$vAddress;
-    $insArr['vAbout']=$vAbout;
-    $insArr['isShowWebsite']=$isShowWebsite;
+    $insArr['vFirstName'] = $vFirstName;
+    $insArr['vMiddleName'] = $vMiddleName;
+    $insArr['vLastName'] = $vLastName;
+    $insArr['vFullName'] = $vFullName;
+    $insArr['vEmail'] = $vEmail;
+    $insArr['vUserEmpPwd'] = $vUserEmpPwd;
+    $insArr['iDesignationId'] = $iDesignationId;
+    $insArr['iDepartmentId'] = $iDepartmentId;
+    $insArr['vMobileNo'] = $vMobileNo;
+    $insArr['iDDGenderId'] = $iDDGenderId;
+    $insArr['iDDBloodGroupId'] = $iDDBloodGroupId;
+    $insArr['vAddress1'] = $vAddress1;
+    $insArr['vAbout'] = $vAbout;
+    $insArr['isShowWebsite'] = $isShowWebsite;
     $insArr['iSchoolId']="1";
 
     $returnArr=array();
-    if($iTeacherId>0){
+    if($iUserEmpId>0){
         $insArr['iLastBy']=1;
         $insArr['dLastDate']=$mfp->curTimedate();
-        $mfp->mf_dbupdate("teacher",$insArr," WHERE iTeacherId=".$iTeacherId."");
+        $mfp->mf_dbupdate("users",$insArr," WHERE iUserEmpId=".$iUserEmpId."");
         $returnArr['status']=200;
-        $returnArr['message']="teacher detail has been updated succuessfull.";
+        $returnArr['message']="Teacher detail has been updated succuessfull.";
     }else{
+        $insArr['iRoleId']=4;
         $insArr['iCreatedBy']=1;
         $insArr['dCreatedDate']=$mfp->curTimedate();
-        $mfp->mf_dbinsert("teacher",$insArr);
+        $mfp->mf_dbinsert("users",$insArr);
         $returnArr['status']=200;
-        $returnArr['message']="Admin has been added succuessfull.";
+        $returnArr['message']="Teacher detail has been added succuessfull.";
     }
 
     echo json_encode($returnArr);
@@ -55,30 +72,31 @@ if($_POST['action']=="AddEditTeacher"){
     $limit = $_POST['limit'];
     $page_index = ($page-1) * $limit;
 
-    $selectedField="SELECT tech.iTeacherId as id,tech.iTeacherId,tech.vTeacherName,tech.vDesignation,dept.vDepartment";
-    $singleField="SELECT tech.iTeacherId";
+    $selectedField="SELECT u.iUserEmpId as id,u.iUserEmpId,u.vFullName,desi.vDesignation,dept.vDepartment";
+    $singleField="SELECT u.iUserEmpId";
 
-    $sql=" FROM teacher as tech 
-            LEFT JOIN department as dept ON dept.iDepartmentId=tech.vDepartment
-            WHERE tech.eStatus='y' AND tech.iSchoolId=1 ";
+    $sql=" FROM users as u 
+            LEFT JOIN department as dept ON dept.iDepartmentId=u.iDepartmentId
+            LEFT JOIN designation as desi ON desi.iDesignationId=u.iDesignationId
+            WHERE u.eStatus='y' AND iRoleId = 4 AND u.iSchoolId=1 ";
 
     if(!empty($searchString)){
-        $sql.=" AND (tech.iTeacherId LIKE '%".$searchString."%' OR
-        tech.vTeacherName LIKE '%".$searchString."%' OR
-        tech.vDesignation LIKE '%".$searchString."%' OR
+        $sql.=" AND (u.iUserEmpId LIKE '%".$searchString."%' OR
+        u.vFullName LIKE '%".$searchString."%' OR
+        desi.vDesignation LIKE '%".$searchString."%' OR
         dept.vDepartment LIKE '%".$searchString."%') ";
     }
 
     if(!empty($extraFilter)){
-        if($extraFilter['vTeacherName']!=""){
-            $sql.=" AND tech.vTeacherName='".$extraFilter['vTeacherName']."'";
+        if($extraFilter['vFullName']!=""){
+            $sql.=" AND u.vFullName='".$extraFilter['vFullName']."'";
         }
         if($extraFilter['iClassId']!=""){
-            $sql.=" AND tech.iClassId=".$extraFilter['iClassId']."";
+            $sql.=" AND u.iClassId=".$extraFilter['iClassId']."";
         }
     }
 
-    $sql.=" GROUP BY tech.iTeacherId ";
+    $sql.=" GROUP BY u.iUserEmpId ";
     
     $sqlSingle=$mfp->mf_query($singleField.$sql);
     $totalSingleRows=$mfp->mf_affected_rows();
@@ -114,7 +132,7 @@ if($_POST['action']=="AddEditTeacher"){
         foreach($totalRecord as $value){
             $updArr=array();
             $updArr['eStatus']="d";
-            $mfp->mf_dbupdate("teacher",$updArr," WHERE iTeacherId=".$value."");
+            $mfp->mf_dbupdate("users",$updArr," WHERE iUserEmpId=".$value."");
         }
     }
 
@@ -124,7 +142,7 @@ if($_POST['action']=="AddEditTeacher"){
 }else if($_POST['action']=="getTeacherDetail"){
     $id=$_POST['id'];
 
-    $sql=$mfp->mf_query("SELECT * FROM teacher WHERE eStatus='y' AND iTeacherId =".$id."");
+    $sql=$mfp->mf_query("SELECT * FROM users WHERE eStatus='y' AND iUserEmpId =".$id."");
     if($mfp->mf_affected_rows()>0){
         $row=$mfp->mf_fetch_array($sql);
         $retArr=array("status"=>200,"data"=>$row);  

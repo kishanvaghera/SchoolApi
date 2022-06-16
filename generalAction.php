@@ -112,6 +112,28 @@ if ($_POST['action']=="deleteDetailsList"){
         }
         $dataArr['BloodGroupList']=$BloodGroupList;
     }
+    
+    if(in_array("DepartmentList", $key)){
+        $sqlDept=$mfp->mf_query("SELECT iDepartmentId as value,vDepartment as label FROM department WHERE eStatus='y' AND iSchoolId=".$iSchoolId."");
+        $DepartmentList=array();      
+        if($mfp->mf_affected_rows()>0){
+            while($row=$mfp->mf_fetch_array($sqlDept)){
+                $DepartmentList[]=$row;
+            }
+        }
+        $dataArr['DepartmentList']=$DepartmentList;
+    }
+    
+    if(in_array("DesignationList", $key)){
+        $sqlDept=$mfp->mf_query("SELECT iDesignationId as value,vDesignation as label FROM designation WHERE eStatus='y' AND iSchoolId=".$iSchoolId."");
+        $DesignationList=array();      
+        if($mfp->mf_affected_rows()>0){
+            while($row=$mfp->mf_fetch_array($sqlDept)){
+                $DesignationList[]=$row;
+            }
+        }
+        $dataArr['DesignationList']=$DesignationList;
+    }
 
     if(!empty($dataArr)){
         $returnArr['status']=200;
