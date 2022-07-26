@@ -35,18 +35,19 @@ if($_POST['action']=="addEditSection"){
     $limit = $_POST['limit'];
     $page_index = ($page-1) * $limit;
 
-    $selectedField="SELECT iSectionId as id,iSectionId,vSectionName,iClassId";
-    $singleField="SELECT iSectionId";
+    $selectedField="SELECT sec.iSectionId as id,sec.iSectionId,sec.vSectionName,sec.iClassId,class.vClassName";
+    $singleField="SELECT sec.iSectionId";
 
-    $sql=" FROM section WHERE eStatus='y' AND iSchoolId=1 ";
+    $sql=" FROM section as sec LEFT JOIN class as class ON class.iClassId = sec.iClassId WHERE sec.eStatus='y' AND sec.iSchoolId=1 ";
 
     if(!empty($searchString)){
         $sql.=" AND (iSectionId LIKE '%".$searchString."%' OR
-        vSectionName LIKE '%".$searchString."%' OR
+        sec.vSectionName LIKE '%".$searchString."%' OR
+        class.vClassName LIKE '%".$searchString."%' OR
         iClassId LIKE '%".$searchString."%') ";
     }
 
-    $sql.=" GROUP BY iSectionId ";
+    $sql.=" GROUP BY sec.iSectionId ";
     
     $sqlSingle=$mfp->mf_query($singleField.$sql);
     $totalSingleRows=$mfp->mf_affected_rows();
@@ -325,6 +326,275 @@ if($_POST['action']=="addEditSection"){
     $id=$_POST['id'];
 
     $sql=$mfp->mf_query("SELECT * FROM designation WHERE eStatus='y' AND iDesignationId =".$id."");
+    if($mfp->mf_affected_rows()>0){
+        $row=$mfp->mf_fetch_array($sql);
+        $retArr=array("status"=>200,"data"=>$row);  
+    }else{
+        $retArr=array("status"=>412,"message","No Data Found!");
+    }
+    echo json_encode($retArr);
+    exit();
+}else if($_POST['action']=="addEditHoliday"){
+    $iHolidayId=$_POST['iHolidayId'];
+    $vHolidayName=$_POST['vHolidayName'];
+    $dFromDate=$_POST['dFromDate'];
+    $dToDate=$_POST['dToDate'];
+
+    $insArr=array();
+    $insArr['vHolidayName']=$vHolidayName;
+    $insArr['dFromDate']=$dFromDate;
+    $insArr['dToDate']=$dToDate;
+    $returnArr=array();
+    if($iHolidayId>0){
+        $insArr['iLastBy']=1;
+        $insArr['dLastDate']=$mfp->curTimedate();
+        $mfp->mf_dbupdate("holiday",$insArr," WHERE iHolidayId=".$iHolidayId."");
+        $returnArr['status']=200;
+        $returnArr['message']="Holiday detail has been updated succuessfull.";
+    }else{
+        $insArr['iCreatedBy']=1;
+        $insArr['iSchoolId']=1;
+        $insArr['dCreatedDate']=$mfp->curTimedate();
+        $mfp->mf_dbinsert("holiday",$insArr);
+        $returnArr['status']=200;
+        $returnArr['message']="Holiday detail has been added succuessfull.";
+    }
+    echo json_encode($returnArr);
+    exit();
+}else if($_POST['action']=="getHolidayList"){
+    $page=$_POST['page'];
+    $searchString=$_POST['searchString'];
+    // $extraFilter=$_POST['extraFilter'];
+
+    $limit = $_POST['limit'];
+    $page_index = ($page-1) * $limit;
+
+    $selectedField="SELECT iHolidayId as id,iHolidayId,vHolidayName,dFromDate,dToDate";
+    $singleField="SELECT iHolidayId";
+
+    $sql=" FROM holiday WHERE eStatus='y' AND iSchoolId=1 ";
+
+    if(!empty($searchString)){
+        $sql.=" AND (iHolidayId LIKE '%".$searchString."%' OR
+        vHolidayName LIKE '%".$searchString."%') ";
+    }
+
+    $sql.=" GROUP BY iHolidayId ";
+    
+    $sqlSingle=$mfp->mf_query($singleField.$sql);
+    $totalSingleRows=$mfp->mf_affected_rows();
+    
+    $sql.=" limit $page_index, $limit";
+
+
+    $sqlQuery=$mfp->mf_query($selectedField.$sql);
+
+    $dataArr=array();
+
+    $totalRows=$mfp->mf_affected_rows();
+    if($totalRows>0){
+        while($row=$mfp->mf_fetch_array($sqlQuery)){
+            $row['dFromDate']=$mfp->date2dispnew($row['dFromDate']);
+            $row['dToDate']=$mfp->date2dispnew($row['dToDate']);
+            $dataArr[]=$row;
+        }
+    }
+
+    $total_pages = ceil($totalSingleRows / $limit); 
+
+    if(!empty($dataArr)){
+        $retArr=array("status"=>200,"data"=>$dataArr,"totalPage"=>$total_pages);
+    }else{
+        $retArr=array("status"=>412,"message"=>"No Data Found!");
+    }
+
+    echo json_encode($retArr);
+    exit();
+}else if($_POST['action']=="getHolidayDetail"){
+    $id=$_POST['id'];
+
+    $sql=$mfp->mf_query("SELECT * FROM holiday WHERE eStatus='y' AND iHolidayId =".$id."");
+    if($mfp->mf_affected_rows()>0){
+        $row=$mfp->mf_fetch_array($sql);
+        $retArr=array("status"=>200,"data"=>$row);  
+    }else{
+        $retArr=array("status"=>412,"message","No Data Found!");
+    }
+    echo json_encode($retArr);
+    exit();
+}else if($_POST['action']=="addEditSyllabus"){
+    $iSyllabusId=$_POST['iSyllabusId'];
+    $vTitle=$_POST['vTitle'];
+    $iClassId=$_POST['iClassId'];
+    $iSectionId=$_POST['iSectionId'];
+    $iSubjectId=$_POST['iSubjectId'];
+    $vSyllabusFile=$_POST['vSyllabusFile'];
+
+    $insArr=array();
+    $insArr['vTitle']=$vTitle;
+    $insArr['iClassId']=$iClassId;
+    $insArr['iSectionId']=$iSectionId;
+    $insArr['iSubjectId']=$iSubjectId;
+    $insArr['vSyllabusFile']=$vSyllabusFile;
+    $returnArr=array();
+    if($iSyllabusId>0){
+        $insArr['iLastBy']=1;
+        $insArr['dLastDate']=$mfp->curTimedate();
+        $mfp->mf_dbupdate("syllabus",$insArr," WHERE iSyllabusId=".$iSyllabusId."");
+        $returnArr['status']=200;
+        $returnArr['message']="Syllabus detail has been updated succuessfull.";
+    }else{
+        $insArr['iCreatedBy']=1;
+        $insArr['iSchoolId']=1;
+        $insArr['dCreatedDate']=$mfp->curTimedate();
+        $mfp->mf_dbinsert("syllabus",$insArr);
+        $returnArr['status']=200;
+        $returnArr['message']="Syllabus detail has been added succuessfull.";
+    }
+    echo json_encode($returnArr);
+    exit();
+}else if($_POST['action']=="getSyllabusList"){
+    $page=$_POST['page'];
+    $searchString=$_POST['searchString'];
+    // $extraFilter=$_POST['extraFilter'];
+
+    $limit = $_POST['limit'];
+    $page_index = ($page-1) * $limit;
+
+    $selectedField="SELECT syll.iSyllabusId as id,syll.iSyllabusId,syll.vTitle,syll.vSyllabusFile,cls.vClassName,sec.vSectionName,sub.vSubjectName";
+    $singleField="SELECT syll.iSyllabusId";
+
+    $sql=" FROM syllabus as syll
+            LEFT JOIN class as cls ON cls.iClassId = syll.iClassId 
+            LEFT JOIN section as sec ON sec.iSectionId = syll.iSectionId 
+            LEFT JOIN subject as sub ON sub.iSubjectId = syll.iSubjectId 
+         WHERE syll.eStatus='y' AND syll.iSchoolId=1 ";
+
+    if(!empty($searchString)){
+        $sql.=" AND (syll.iSyllabusId LIKE '%".$searchString."%' OR
+        syll.vTitle LIKE '%".$searchString."%') ";
+    }
+
+    $sql.=" GROUP BY syll.iSyllabusId ";
+    
+    $sqlSingle=$mfp->mf_query($singleField.$sql);
+    $totalSingleRows=$mfp->mf_affected_rows();
+    
+    $sql.=" limit $page_index, $limit";
+
+    $sqlQuery=$mfp->mf_query($selectedField.$sql);
+
+    $dataArr=array();
+
+    $totalRows=$mfp->mf_affected_rows();
+    if($totalRows>0){
+        while($row=$mfp->mf_fetch_array($sqlQuery)){
+            $dataArr[]=$row;
+        }
+    }
+
+    $total_pages = ceil($totalSingleRows / $limit); 
+
+    if(!empty($dataArr)){
+        $retArr=array("status"=>200,"data"=>$dataArr,"totalPage"=>$total_pages);
+    }else{
+        $retArr=array("status"=>412,"message"=>"No Data Found!");
+    }
+
+    echo json_encode($retArr);
+    exit();
+}else if($_POST['action']=="getSyllabusDetail"){
+    $id=$_POST['id'];
+
+    $sql=$mfp->mf_query("SELECT * FROM syllabus WHERE eStatus='y' AND iSyllabusId =".$id."");
+    if($mfp->mf_affected_rows()>0){
+        $row=$mfp->mf_fetch_array($sql);
+        $retArr=array("status"=>200,"data"=>$row);  
+    }else{
+        $retArr=array("status"=>412,"message","No Data Found!");
+    }
+    echo json_encode($retArr);
+    exit();
+}else if($_POST['action']=="addEditEvent"){
+    $iEventId=$_POST['iEventId'];
+    $vEventName=$_POST['vEventName'];
+    $dFromDate=$_POST['dFromDate'];
+    $dToDate=$_POST['dToDate'];
+
+    $insArr=array();
+    $insArr['vEventName']=$vEventName;
+    $insArr['dFromDate']=$dFromDate;
+    $insArr['dToDate']=$dToDate;
+    $returnArr=array();
+    if($iEventId>0){
+        $insArr['iLastBy']=1;
+        $insArr['dLastDate']=$mfp->curTimedate();
+        $mfp->mf_dbupdate("events",$insArr," WHERE iEventId=".$iEventId."");
+        $returnArr['status']=200;
+        $returnArr['message']="Event detail has been updated succuessfull.";
+    }else{
+        $insArr['iCreatedBy']=1;
+        $insArr['iSchoolId']=1;
+        $insArr['dCreatedDate']=$mfp->curTimedate();
+        $mfp->mf_dbinsert("events",$insArr);
+        $returnArr['status']=200;
+        $returnArr['message']="Event detail has been added succuessfull.";
+    }
+    echo json_encode($returnArr);
+    exit();
+}else if($_POST['action']=="getEventList"){
+    $page=$_POST['page'];
+    $searchString=$_POST['searchString'];
+    // $extraFilter=$_POST['extraFilter'];
+
+    $limit = $_POST['limit'];
+    $page_index = ($page-1) * $limit;
+
+    $selectedField="SELECT iEventId as id,iEventId,vEventName,dFromDate,dToDate";
+    $singleField="SELECT iEventId";
+
+    $sql=" FROM events WHERE eStatus='y' AND iSchoolId=1 ";
+
+    if(!empty($searchString)){
+        $sql.=" AND (iEventId LIKE '%".$searchString."%' OR
+        vEventName LIKE '%".$searchString."%') ";
+    }
+
+    $sql.=" GROUP BY iEventId ";
+    
+    $sqlSingle=$mfp->mf_query($singleField.$sql);
+    $totalSingleRows=$mfp->mf_affected_rows();
+    
+    $sql.=" limit $page_index, $limit";
+
+
+    $sqlQuery=$mfp->mf_query($selectedField.$sql);
+
+    $dataArr=array();
+
+    $totalRows=$mfp->mf_affected_rows();
+    if($totalRows>0){
+        while($row=$mfp->mf_fetch_array($sqlQuery)){
+            $row['dFromDate']=$mfp->date2dispnew($row['dFromDate']);
+            $row['dToDate']=$mfp->date2dispnew($row['dToDate']);
+            $dataArr[]=$row;
+        }
+    }
+
+    $total_pages = ceil($totalSingleRows / $limit); 
+
+    if(!empty($dataArr)){
+        $retArr=array("status"=>200,"data"=>$dataArr,"totalPage"=>$total_pages);
+    }else{
+        $retArr=array("status"=>412,"message"=>"No Data Found!");
+    }
+
+    echo json_encode($retArr);
+    exit();
+}else if($_POST['action']=="getEventDetail"){
+    $id=$_POST['id'];
+
+    $sql=$mfp->mf_query("SELECT * FROM events WHERE eStatus='y' AND iEventId =".$id."");
     if($mfp->mf_affected_rows()>0){
         $row=$mfp->mf_fetch_array($sql);
         $retArr=array("status"=>200,"data"=>$row);  

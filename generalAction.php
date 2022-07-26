@@ -80,17 +80,6 @@ if ($_POST['action']=="deleteDetailsList"){
         $dataArr['SchoolList']=$subSchoolList;
     }
     
-    if(in_array("ParentsList", $key)){
-        $sqlParents=$mfp->mf_query("SELECT iParentId as value,vName as label FROM parent WHERE eStatus='y'");
-        $subParentsList=array();
-        if($mfp->mf_affected_rows()>0){
-            while($row=$mfp->mf_fetch_array($sqlParents)){
-                $subParentsList[]=$row;
-            }
-        }
-        $dataArr['ParentsList']=$subParentsList;
-    }
-
     if(in_array("GenderList", $key)){
         $sqlGender=$mfp->mf_query("SELECT iValueId as value,vName as label FROM dd_value WHERE iKeyId=2");
         $GenderList=array();      
@@ -133,6 +122,39 @@ if ($_POST['action']=="deleteDetailsList"){
             }
         }
         $dataArr['DesignationList']=$DesignationList;
+    }
+
+    if(in_array("ParentsList", $key)){
+        $sqlParents=$mfp->mf_query("SELECT iUserEmpId as value,vFullName as label FROM users WHERE eStatus='y' AND iSchoolId=".$iSchoolId." AND iRoleId = '6' AND eActiveStatus = 'Active'");
+        $ParentsList=array();
+        if($mfp->mf_affected_rows()>0){
+            while($row=$mfp->mf_fetch_array($sqlParents)){
+                $ParentsList[]=$row;
+            }
+        }
+        $dataArr['ParentsList']=$ParentsList;
+    }
+
+    if(in_array("StudentList", $key)){
+        $sqlStd=$mfp->mf_query("SELECT iUserEmpId as value,vFullName as label FROM users WHERE eStatus='y' AND iSchoolId=".$iSchoolId." AND iRoleId = '5' AND eActiveStatus = 'Active'");
+        $StudentList=array();      
+        if($mfp->mf_affected_rows()>0){
+            while($row=$mfp->mf_fetch_array($sqlStd)){
+                $StudentList[]=$row;
+            }
+        }
+        $dataArr['StudentList']=$StudentList;
+    }
+    
+    if(in_array("TeacherList", $key)){
+        $sqlTeacher=$mfp->mf_query("SELECT iUserEmpId as value,vFullName as label FROM users WHERE eStatus='y' AND iSchoolId=".$iSchoolId." AND iRoleId = '4' AND eActiveStatus = 'Active'");
+        $TeacherList=array();      
+        if($mfp->mf_affected_rows()>0){
+            while($row=$mfp->mf_fetch_array($sqlTeacher)){
+                $TeacherList[]=$row;
+            }
+        }
+        $dataArr['TeacherList']=$TeacherList;
     }
 
     if(!empty($dataArr)){
