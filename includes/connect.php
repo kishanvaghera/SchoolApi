@@ -9,6 +9,8 @@
 header('Access-Control-Allow-Origin: *');
 header('Content-Type: application/json');
 
+error_reporting(0);
+
 include ("includes/class.php");
 
 $input = file_get_contents('php://input');

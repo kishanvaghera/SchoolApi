@@ -504,6 +504,16 @@ class Crud extends Dbconnect
 		}
 	}
 
+	public function date2saveISO($date, $format = "Y-m-d H:i:s") // CONVERT DATE TO STORE FORMAT (MYSQL FORMAT)
+	{
+		if ($date == "" || $date == '0000-00-00 00:00:00') {
+			return "";
+		} else {
+			$newDt = date($format, strtotime($date));
+			return $newDt;
+		}
+	}
+
     public function timetosave($time) // CONVERT TIME TO STORE FORMAT (MYSQL FORMAT)
 	{
 		if ($time != "") {
@@ -765,6 +775,30 @@ class Crud extends Dbconnect
 		return $str;
 	}
 
+	function file_decode($vFileData, $fixPath, $fileName = "")
+	{
+		$image_parts = explode(";base64,", $vFileData);
+		$image_type_aux = explode("/", $image_parts[0]);
+		$image_base64 = base64_decode($image_parts[1]);
+
+		$orgFileName = $fileName;
+		$orgFileName = preg_replace('/[^a-zA-Z0-9_ ()-.]/s', '', $orgFileName);
+		$orgFileName = preg_replace('/[ ]/s', '_-_', $orgFileName);
+		$expName = explode(".", $orgFileName);
+
+		$vNewFileName = uniqid() . '.' . $image_type_aux[1];
+
+		$year = date("y");
+		$month = date("m");
+		$directory = "$year/$month/";
+		$fullPath = $fixPath . $vNewFileName;
+		if (!is_dir($fixPath)) {
+			mkdir($fixPath, 0777, true);
+		}
+		if (file_put_contents($fullPath, $image_base64)) {
+			return $vNewFileName;
+		}
+	}
 }
 
 $mfp= new crud(); 

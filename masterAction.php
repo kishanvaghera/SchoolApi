@@ -435,7 +435,9 @@ if($_POST['action']=="addEditSection"){
     $insArr['iClassId']=$iClassId;
     $insArr['iSectionId']=$iSectionId;
     $insArr['iSubjectId']=$iSubjectId;
-    $insArr['vSyllabusFile']=$vSyllabusFile;
+    if($vSyllabusFile['File'] != ""){
+        $insArr['vSyllabusFile']=$mfp->file_decode($vSyllabusFile['File'], 'upload/Syllabus/', $fileName = "");
+    }
     $returnArr=array();
     if($iSyllabusId>0){
         $insArr['iLastBy']=1;
