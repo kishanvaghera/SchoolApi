@@ -156,6 +156,39 @@ if ($_POST['action']=="deleteDetailsList"){
         }
         $dataArr['TeacherList']=$TeacherList;
     }
+    
+    if(in_array("StudentTeacherList", $key)){
+        $sqlStdTeacher=$mfp->mf_query("SELECT u.iUserEmpId as value,CONCAT(ur.vRoleName,' | ',u.vFullName) as label FROM users as u LEFT JOIN user_role as ur ON ur.iRoleId = u.iRoleId WHERE u.eStatus='y' AND u.iSchoolId=".$iSchoolId." AND u.iRoleId IN (4,5) AND u.eActiveStatus = 'Active'");
+        $StdTeacherList=array();      
+        if($mfp->mf_affected_rows()>0){
+            while($row=$mfp->mf_fetch_array($sqlStdTeacher)){
+                $StdTeacherList[]=$row;
+            }
+        }
+        $dataArr['StudentTeacherList']=$StdTeacherList;
+    }
+
+    if(in_array("LeaveTypeList", $key)){
+        $sqlLvType=$mfp->mf_query("SELECT iLeaveTypeId as value,vLeaveType as label FROM leave_type WHERE eStatus='y' AND iSchoolId=".$iSchoolId."");
+        $LeaveTypeList=array();      
+        if($mfp->mf_affected_rows()>0){
+            while($row=$mfp->mf_fetch_array($sqlLvType)){
+                $LeaveTypeList[]=$row;
+            }
+        }
+        $dataArr['LeaveTypeList']=$LeaveTypeList;
+    }
+    
+    if(in_array("LeaveReasonList", $key)){
+        $sqlLvReason=$mfp->mf_query("SELECT iReasonId as value,vLeaveReason as label FROM leave_reason WHERE eStatus='y' AND iSchoolId=".$iSchoolId."");
+        $LeaveReasonList=array();      
+        if($mfp->mf_affected_rows()>0){
+            while($row=$mfp->mf_fetch_array($sqlLvReason)){
+                $LeaveReasonList[]=$row;
+            }
+        }
+        $dataArr['LeaveReasonList']=$LeaveReasonList;
+    }
 
     if(!empty($dataArr)){
         $returnArr['status']=200;

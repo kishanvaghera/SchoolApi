@@ -15,7 +15,7 @@ if($_POST['action']=="addEditSection"){
         $insArr['dLastDate']=$mfp->curTimedate();
         $mfp->mf_dbupdate("section",$insArr," WHERE iSectionId=".$iSectionId."");
         $returnArr['status']=200;
-        $returnArr['message']="section detail has been updated succuessfull.";
+        $returnArr['message']="section has been updated succuessfull.";
     }else{
         $insArr['iCreatedBy']=1;
         $insArr['iSchoolId']=1;
@@ -597,6 +597,172 @@ if($_POST['action']=="addEditSection"){
     $id=$_POST['id'];
 
     $sql=$mfp->mf_query("SELECT * FROM events WHERE eStatus='y' AND iEventId =".$id."");
+    if($mfp->mf_affected_rows()>0){
+        $row=$mfp->mf_fetch_array($sql);
+        $retArr=array("status"=>200,"data"=>$row);  
+    }else{
+        $retArr=array("status"=>412,"message","No Data Found!");
+    }
+    echo json_encode($retArr);
+    exit();
+}else if($_POST['action']=="addEditLeaveType"){
+    $iLeaveTypeId=(int)$_POST['iLeaveTypeId'];
+    $vLeaveType=$_POST['vLeaveType'];
+
+    $insArr=array();
+    $insArr['vLeaveType']=$vLeaveType;
+    $returnArr=array();
+    if($iLeaveTypeId>0){
+        $insArr['iLastBy']=1;
+        $insArr['dLastDate']=$mfp->curTimedate();
+        $mfp->mf_dbupdate("leave_type",$insArr," WHERE iLeaveTypeId=".$iLeaveTypeId."");
+        $returnArr['status']=200;
+        $returnArr['message']="Leave Type has been updated succuessfull.";
+    }else{
+        $insArr['iCreatedBy']=1;
+        $insArr['iSchoolId']=1;
+        $insArr['dCreatedDate']=$mfp->curTimedate();
+        $mfp->mf_dbinsert("leave_type",$insArr);
+        $returnArr['status']=200;
+        $returnArr['message']="Leave Type has been added succuessfull.";
+    }
+
+    echo json_encode($returnArr);
+    exit();
+}else if($_POST['action']=="getLeaveTypeList"){
+    $page=$_POST['page'];
+    $searchString=$_POST['searchString'];
+    // $extraFilter=$_POST['extraFilter'];
+
+    $limit = $_POST['limit'];
+    $page_index = ($page-1) * $limit;
+
+    $selectedField="SELECT iLeaveTypeId as id,iLeaveTypeId,vLeaveType";
+    $singleField="SELECT iLeaveTypeId";
+
+    $sql=" FROM leave_type WHERE eStatus='y' AND iSchoolId=1 ";
+
+    if(!empty($searchString)){
+        $sql.=" AND (iLeaveTypeId LIKE '%".$searchString."%' OR
+        vLeaveType LIKE '%".$searchString."%') ";
+    }
+
+    $sql.=" GROUP BY iLeaveTypeId ";
+    
+    $sqlSingle=$mfp->mf_query($singleField.$sql);
+    $totalSingleRows=$mfp->mf_affected_rows();
+    
+    $sql.=" limit $page_index, $limit";
+
+
+    $sqlQuery=$mfp->mf_query($selectedField.$sql);
+
+    $dataArr=array();
+
+    $totalRows=$mfp->mf_affected_rows();
+    if($totalRows>0){
+        while($row=$mfp->mf_fetch_array($sqlQuery)){
+            $dataArr[]=$row;
+        }
+    }
+
+    $total_pages = ceil($totalSingleRows / $limit); 
+
+    if(!empty($dataArr)){
+        $retArr=array("status"=>200,"data"=>$dataArr,"totalPage"=>$total_pages);
+    }else{
+        $retArr=array("status"=>412,"message"=>"No Data Found!");
+    }
+
+    echo json_encode($retArr);
+    exit();
+}else if($_POST['action']=="getLeaveTypeDetail"){
+    $id=$_POST['id'];
+
+    $sql=$mfp->mf_query("SELECT * FROM leave_type WHERE eStatus='y' AND iLeaveTypeId =".$id."");
+    if($mfp->mf_affected_rows()>0){
+        $row=$mfp->mf_fetch_array($sql);
+        $retArr=array("status"=>200,"data"=>$row);  
+    }else{
+        $retArr=array("status"=>412,"message","No Data Found!");
+    }
+    echo json_encode($retArr);
+    exit();
+}else if($_POST['action']=="addEditLeaveReason"){
+    $iReasonId=(int)$_POST['iReasonId'];
+    $vLeaveReason=$_POST['vLeaveReason'];
+
+    $insArr=array();
+    $insArr['vLeaveReason']=$vLeaveReason;
+    $returnArr=array();
+    if($iReasonId>0){
+        $insArr['iLastBy']=1;
+        $insArr['dLastDate']=$mfp->curTimedate();
+        $mfp->mf_dbupdate("leave_reason",$insArr," WHERE iReasonId=".$iReasonId."");
+        $returnArr['status']=200;
+        $returnArr['message']="Leave Reason has been updated succuessfull.";
+    }else{
+        $insArr['iCreatedBy']=1;
+        $insArr['iSchoolId']=1;
+        $insArr['dCreatedDate']=$mfp->curTimedate();
+        $mfp->mf_dbinsert("leave_reason",$insArr);
+        $returnArr['status']=200;
+        $returnArr['message']="Leave Reason has been added succuessfull.";
+    }
+
+    echo json_encode($returnArr);
+    exit();
+}else if($_POST['action']=="getLeaveReasonList"){
+    $page=$_POST['page'];
+    $searchString=$_POST['searchString'];
+    // $extraFilter=$_POST['extraFilter'];
+
+    $limit = $_POST['limit'];
+    $page_index = ($page-1) * $limit;
+
+    $selectedField="SELECT iReasonId as id,iReasonId,vLeaveReason";
+    $singleField="SELECT iReasonId";
+
+    $sql=" FROM leave_reason WHERE eStatus='y' AND iSchoolId=1 ";
+
+    if(!empty($searchString)){
+        $sql.=" AND (iReasonId LIKE '%".$searchString."%' OR
+        vLeaveReason LIKE '%".$searchString."%') ";
+    }
+
+    $sql.=" GROUP BY iReasonId ";
+    
+    $sqlSingle=$mfp->mf_query($singleField.$sql);
+    $totalSingleRows=$mfp->mf_affected_rows();
+    
+    $sql.=" limit $page_index, $limit";
+
+
+    $sqlQuery=$mfp->mf_query($selectedField.$sql);
+
+    $dataArr=array();
+
+    $totalRows=$mfp->mf_affected_rows();
+    if($totalRows>0){
+        while($row=$mfp->mf_fetch_array($sqlQuery)){
+            $dataArr[]=$row;
+        }
+    }
+
+    $total_pages = ceil($totalSingleRows / $limit); 
+
+    if(!empty($dataArr)){
+        $retArr=array("status"=>200,"data"=>$dataArr,"totalPage"=>$total_pages);
+    }else{
+        $retArr=array("status"=>412,"message"=>"No Data Found!");
+    }
+
+    echo json_encode($retArr);
+    exit();
+}else if($_POST['action']=="getLeaveReasonDetail"){
+    $id=$_POST['id'];
+
+    $sql=$mfp->mf_query("SELECT * FROM leave_reason WHERE eStatus='y' AND iReasonId =".$id."");
     if($mfp->mf_affected_rows()>0){
         $row=$mfp->mf_fetch_array($sql);
         $retArr=array("status"=>200,"data"=>$row);  
