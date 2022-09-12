@@ -189,6 +189,17 @@ if ($_POST['action']=="deleteDetailsList"){
         }
         $dataArr['LeaveReasonList']=$LeaveReasonList;
     }
+    
+    if(in_array("BookList", $key)){
+        $sqlLvReason=$mfp->mf_query("SELECT iBookId as value,vBookName as label FROM library_books WHERE eStatus='y' AND iSchoolId=".$iSchoolId."");
+        $BookList=array();      
+        if($mfp->mf_affected_rows()>0){
+            while($row=$mfp->mf_fetch_array($sqlLvReason)){
+                $BookList[]=$row;
+            }
+        }
+        $dataArr['BookList']=$BookList;
+    }
 
     if(!empty($dataArr)){
         $returnArr['status']=200;
