@@ -771,6 +771,175 @@ if($_POST['action']=="addEditSection"){
     }
     echo json_encode($retArr);
     exit();
+}else if($_POST['action']=="addEditClass"){
+    $iClassId=$_POST['iClassId'];
+    $vClassName=$_POST['vClassName'];
+
+    $insArr=array();
+    $insArr['vClassName']=$vClassName;
+    $returnArr=array();
+    if($iClassId>0){
+        $insArr['iLastBy']=1;
+        $insArr['dLastDate']=$mfp->curTimedate();
+        $mfp->mf_dbupdate("class",$insArr," WHERE iClassId=".$iClassId."");
+        $returnArr['status']=200;
+        $returnArr['message']="Class detail has been updated succuessfull.";
+    }else{
+        $insArr['iCreatedBy']=1;
+        $insArr['iSchoolId']=1;
+        $insArr['dCreatedDate']=$mfp->curTimedate();
+        $mfp->mf_dbinsert("class",$insArr);
+        $returnArr['status']=200;
+        $returnArr['message']="Class has been added succuessfull.";
+    }
+    echo json_encode($returnArr);
+    exit();
+}else if($_POST['action']=="getClassList"){
+    $page=$_POST['page'];
+    $searchString=$_POST['searchString'];
+    // $extraFilter=$_POST['extraFilter'];
+
+    $limit = $_POST['limit'];
+    $page_index = ($page-1) * $limit;
+
+    $selectedField="SELECT iClassId as id,iClassId,vClassName";
+    $singleField="SELECT iClassId";
+
+    $sql=" FROM class WHERE eStatus='y' AND iSchoolId=1 ";
+
+    if(!empty($searchString)){
+        $sql.=" AND (iClassId LIKE '%".$searchString."%' OR
+        vClassName LIKE '%".$searchString."%') ";
+    }
+
+    $sql.=" GROUP BY iClassId ";
+    
+    $sqlSingle=$mfp->mf_query($singleField.$sql);
+    $totalSingleRows=$mfp->mf_affected_rows();
+    
+    $sql.=" limit $page_index, $limit";
+
+
+    $sqlQuery=$mfp->mf_query($selectedField.$sql);
+
+    $dataArr=array();
+
+    $totalRows=$mfp->mf_affected_rows();
+    if($totalRows>0){
+        while($row=$mfp->mf_fetch_array($sqlQuery)){
+            $dataArr[]=$row;
+        }
+    }
+
+    $total_pages = ceil($totalSingleRows / $limit); 
+
+    if(!empty($dataArr)){
+        $retArr=array("status"=>200,"data"=>$dataArr,"totalPage"=>$total_pages);
+    }else{
+        $retArr=array("status"=>412,"message"=>"No Data Found!");
+    }
+
+    echo json_encode($retArr);
+    exit();
+}else if($_POST['action']=="getClassDetail"){
+    $id=$_POST['id'];
+
+    $sql=$mfp->mf_query("SELECT * FROM class WHERE eStatus='y' AND iClassId =".$id."");
+    if($mfp->mf_affected_rows()>0){
+        $row=$mfp->mf_fetch_array($sql);
+        $retArr=array("status"=>200,"data"=>$row);  
+    }else{
+        $retArr=array("status"=>412,"message","No Data Found!");
+    }
+    echo json_encode($retArr);
+    exit();
+}else if($_POST['action']=="addEditClassRoom"){
+    $iClassRoomId=$_POST['iClassRoomId'];
+    $iClassId=$_POST['iClassId'];
+    $vClassRoom=$_POST['vClassRoom'];
+
+    $insArr=array();
+    $insArr['iClassId']=$iClassId;
+    $insArr['vClassRoom']=$vClassRoom;
+    $returnArr=array();
+    if($iClassRoomId>0){
+        $insArr['iLastBy']=1;
+        $insArr['dLastDate']=$mfp->curTimedate();
+        $mfp->mf_dbupdate("class_room",$insArr," WHERE iClassRoomId=".$iClassRoomId."");
+        $returnArr['status']=200;
+        $returnArr['message']="Class room details has been updated succuessfull.";
+    }else{
+        $insArr['iCreatedBy']=1;
+        $insArr['iSchoolId']=1;
+        $insArr['dCreatedDate']=$mfp->curTimedate();
+        $mfp->mf_dbinsert("class_room",$insArr);
+        $returnArr['status']=200;
+        $returnArr['message']="Class room has been added succuessfull.";
+    }
+    echo json_encode($returnArr);
+    exit();
+}else if($_POST['action']=="getClassRoomList"){
+    $page=$_POST['page'];
+    $searchString=$_POST['searchString'];
+    // $extraFilter=$_POST['extraFilter'];
+
+    $limit = $_POST['limit'];
+    $page_index = ($page-1) * $limit;
+
+    $selectedField="SELECT cr.iClassRoomId as id,cr.iClassRoomId,cr.vClassRoom,cl.vClassName";
+    $singleField="SELECT cr.iClassRoomId";
+
+    $sql=" FROM class_room as cr 
+            LEFT JOIN class as cl ON cl.iClassId = cr.iClassId
+        WHERE cr.eStatus='y' AND cr.iSchoolId=1 ";
+
+    if(!empty($searchString)){
+        $sql.=" AND (cr.iClassRoomId LIKE '%".$searchString."%' OR
+        cr.vClassRoom LIKE '%".$searchString."%' OR
+        cl.vClassName LIKE '%".$searchString."%') ";
+    }
+
+    $sql.=" GROUP BY cr.iClassRoomId ";
+    
+    $sqlSingle=$mfp->mf_query($singleField.$sql);
+    $totalSingleRows=$mfp->mf_affected_rows();
+    
+    $sql.=" limit $page_index, $limit";
+
+
+    $sqlQuery=$mfp->mf_query($selectedField.$sql);
+
+    $dataArr=array();
+
+    $totalRows=$mfp->mf_affected_rows();
+    if($totalRows>0){
+        while($row=$mfp->mf_fetch_array($sqlQuery)){
+            $dataArr[]=$row;
+        }
+    }
+
+    $total_pages = ceil($totalSingleRows / $limit); 
+
+    if(!empty($dataArr)){
+        $retArr=array("status"=>200,"data"=>$dataArr,"totalPage"=>$total_pages);
+    }else{
+        $retArr=array("status"=>412,"message"=>"No Data Found!");
+    }
+
+    echo json_encode($retArr);
+    exit();
+}else if($_POST['action']=="getClassRoomDetail"){
+    $id=$_POST['id'];
+
+    $sql=$mfp->mf_query("SELECT * FROM class_room WHERE eStatus='y' AND iClassRoomId =".$id."");
+    if($mfp->mf_affected_rows()>0){
+        $row=$mfp->mf_fetch_array($sql);
+        $retArr=array("status"=>200,"data"=>$row);  
+    }else{
+        $retArr=array("status"=>412,"message","No Data Found!");
+    }
+    echo json_encode($retArr);
+    exit();
 }
 
 ?>
