@@ -1,12 +1,12 @@
 const express =require("express");
 const router=express.Router();
 const con=require("./config");
-const md5 = require('md5');
+const sha1 = require('sha1');
 //Login API
 router.post("/",(req,res)=>{
     const data=req.body;
     if(data.action=="login"){
-        con.query("select * from users WHERE vUserEmpPwd='"+md5(data.vUserEmpPwd)+"' AND vUserName='"+data.vUserName+"'",(err,result)=>{
+        con.query("select * from users WHERE vUserEmpPwd='"+sha1(data.vUserEmpPwd)+"' AND vUserName='"+data.vUserName+"'",(err,result)=>{
             if(err){
                 res.send({status:412,message:"Username or password is wrong!"});
             }else{
