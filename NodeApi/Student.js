@@ -28,6 +28,26 @@ router.post("/",(req,res)=>{
                 res.send({status:200,message:"Student has been added Succesfully."});
             }
         });
+    }else if(data.action=="addHomeWork"){
+        const insData=InsertFunc(data.data);
+        var insValue = insData.keyValues.map(d => `'${d}'`).join(','); 
+        con.query("INSERT INTO homework ("+insData.keyNames.toString()+") VALUES ("+insValue+")", function (err, result) {  
+            if(err){
+                res.send({status:412,message:"No Record Found!"});
+            }else{
+                res.send({status:200,message:"Homework has been added Succesfully."});
+            }
+        });
+    }else if(data.action=="addSyllabus"){
+        const insData=InsertFunc(data.data);
+        var insValue = insData.keyValues.map(d => `'${d}'`).join(','); 
+        con.query("INSERT INTO syllabus ("+insData.keyNames.toString()+") VALUES ("+insValue+")", function (err, result) {  
+            if(err){
+                res.send({status:412,message:"No Record Found!"});
+            }else{
+                res.send({status:200,message:"Syllabus has been added Succesfully."});
+            }
+        });
     }else{
         res.send({status:412,message:"No Data Found!"});
     }
