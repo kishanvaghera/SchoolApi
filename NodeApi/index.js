@@ -14,6 +14,8 @@ app.use(express.json());
 // enabling CORS for all requests
 app.use(cors());
 
+const AuthRouter=require("./Auth");
+
 const StudentRouter=require("./Student");
 
 const TeacherRouter=require("./Teacher");
