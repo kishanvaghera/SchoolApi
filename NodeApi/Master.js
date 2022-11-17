@@ -26,6 +26,8 @@ router.post("/",(req,res)=>{
                 res.send({status:200,message:"Subject has been added Succesfully."});
             }
         });
+    }else if(data.action == "addEditSection"){
+        console.log("helooo");
     }
 })
 
