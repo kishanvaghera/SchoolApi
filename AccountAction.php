@@ -40,7 +40,7 @@ if($_POST['action'] == "addEditStdFee"){
     }
     echo json_encode($returnArr);
     exit();
-}else if($_POST['action']=="getStdInvList"){
+}else if($_POST['action'] == "getStdInvList"){
     $page=$_POST['page'];
     $searchString=$_POST['searchString'];
     // $extraFilter=$_POST['extraFilter'];
@@ -90,7 +90,7 @@ if($_POST['action'] == "addEditStdFee"){
 
     echo json_encode($retArr);
     exit();
-}else if($_POST['action']=="getSyllabusDetail"){
+}else if($_POST['action'] == "getSyllabusDetail"){
     $id=$_POST['id'];
 
     $sql=$mfp->mf_query("SELECT * FROM syllabus WHERE eStatus='y' AND iStdInvId =".$id."");
@@ -119,5 +119,17 @@ if($_POST['action'] == "addEditStdFee"){
 
     echo json_encode($rtnArr);
     exit;
+}else if($_POST['action'] == "getStdInvDetails"){
+    $id=$_POST['id'];
+
+    $sql=$mfp->mf_query("SELECT * FROM std_fee_inv WHERE eStatus='y' AND iStdInvId =".$id."");
+    if($mfp->mf_affected_rows()>0){
+        $row=$mfp->mf_fetch_array($sql);
+        $retArr=array("status"=>200,"data"=>$row);  
+    }else{
+        $retArr=array("status"=>412,"message","No Data Found!");
+    }
+    echo json_encode($retArr);
+    exit();
 }
 ?>

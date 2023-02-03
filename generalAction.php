@@ -57,6 +57,17 @@ if ($_POST['action']=="deleteDetailsList"){
         }
         $dataArr['TermExamList']=$subTermsList;
     }
+    
+    if(in_array("ExamList", $key)){
+        $sqlExamList=$mfp->mf_query("SELECT iExamId as value,vExam as label FROM exams WHERE iSchoolId=1 AND eStatus = 'y'");
+        $subExamList=array();      
+        if($mfp->mf_affected_rows()>0){
+            while($row=$mfp->mf_fetch_array($sqlExamList)){
+                $subExamList[]=$row;
+            }
+        }
+        $dataArr['ExamList']=$subExamList;
+    }
 
     if(in_array("SubjectList", $key)){
         $sqlSubject=$mfp->mf_query("SELECT iSubjectId as value,vSubjectName as label FROM subject WHERE eStatus='y' AND iSchoolId=".$iSchoolId."");

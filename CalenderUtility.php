@@ -117,4 +117,8 @@ function parseDateTime($string, $timeZone=null) {
 function stripTime($datetime) {
   return new DateTime($datetime->format('Y-m-d'));
 }
+
+function rndRGBColorCode() { 
+  return 'rgb(' . rand(0, 255) . ',' . rand(0, 255) . ',' . rand(0, 255) . ')'; #using the inbuilt random function 
+}
 ?>

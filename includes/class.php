@@ -799,6 +799,103 @@ class Crud extends Dbconnect
 			return $vNewFileName;
 		}
 	}
+
+	function getUserAllData($iUserEmpId,$aDateRangeArr = array()){
+
+		$selUser = $this->mf_query("SELECT u.iSchoolId,u.iRoleId,u.vFullName,u.iClassId,u.iSectionId
+                                FROM users as u
+                                WHERE u.iUserEmpId = '" . $iUserEmpId . "' AND u.eStatus = 'y' ");
+		$rowUser = $this->mf_fetch_array($selUser);
+		$iSchoolId = $rowUser['iSchoolId'];
+		$iRoleId = $rowUser['iRoleId'];
+		$vFullName = $rowUser['vFullName'];
+		$iClassId = $rowUser['iClassId'];
+		$iSectionId = $rowUser['iSectionId'];
+
+		$retunArr = array();
+		$aMonthYear = array();
+		foreach ($aDateRangeArr as $dDate) {
+			$aMonthYear[] = date('m-Y', strtotime($dDate));
+		}
+
+		$aMonthYearArr = array_unique($aMonthYear);
+
+		$aDatesMonthYear = array();
+		foreach ($aMonthYearArr as $aMonthYear) {
+			$aTempArr = explode('-', $aMonthYear);
+			$iMonth = $aTempArr[0];
+			$iYear = $aTempArr[1];
+
+			$dStartDate = $iYear . '-' . $iMonth . '-01';
+			$dEndDate = date('Y-m-t', strtotime($dStartDate));
+
+			$aDateRange = $this->getDatesFromRange($dStartDate, $dEndDate);
+			foreach ($aDateRange as $date) {
+				$aDatesMonthYear[] = $date;
+			}
+		}
+
+		$aAltWeekOffArr = array(
+			140 => 'first {vDay} Of {vMonth} {vYear}',
+			141 => 'second {vDay} Of {vMonth} {vYear}',
+			142 => 'third {vDay} Of {vMonth} {vYear}',
+			143 => 'fourth {vDay} Of {vMonth} {vYear}',
+			144 => 'fifth {vDay} Of {vMonth} {vYear}',
+		);
+
+		$aHolidayArr = array();
+		$aHolidayDateArr = array();
+		$selHoliday = $this->mf_query("SELECT iHolidayId,vHolidayName,dFromDate,dToDate FROM holiday WHERE iSchoolId = '" . $iSchoolId . "' AND eStatus = 'y'");
+		if ($this->mf_affected_rows() > 0) {
+			while ($rowHoliday = $this->mf_fetch_array($selHoliday)) {
+				$aDateRange = $this->getDatesFromRange($rowHoliday['dFromDate'], $rowHoliday['dToDate']);
+				if (!empty($aDateRange)) {
+						foreach ($aDateRange as $dDate) {
+							if (in_array($dDate, (array)$aDateRangeArr)) {
+								$aHolidayArr[] = array("iHolidayId" => $rowHoliday['iHolidayId'], "dDate" => $dDate, "vHolidayName" => $rowHoliday['vHolidayName']);
+								$aHolidayDateArr[$dDate] = array('vHolidayName' => $rowHoliday['vHolidayName'], "iHolidayId" => $rowHoliday['iHolidayId']);
+							}
+						}
+				}
+			}
+		}
+
+		$retunArr['aHolidayArr'] = $aHolidayArr;
+		$retunArr['aHolidayDateArr'] = $aHolidayDateArr;
+		$retunArr['iTotHoliday'] = count((array)$aHolidayArr);
+
+		$aLeaveArr = array();
+		$aLeaveDateArr = array();
+		$selLeave = $this->mf_query("SELECT lv.iLeaveId,lv.dFromDate,lv.dToDate,lr.vLeaveReason,lt.vLeaveType
+										FROM leaves as lv
+											LEFT JOIN leave_reason as lr ON lr.iReasonId = lv.iReasonId
+											LEFT JOIN leave_type as lt ON lt.iLeaveTypeId = lv.iLeaveTypeId
+										WHERE lv.iUserEmpId = '".$iUserEmpId."' AND lv.eStatus = 'y' AND lv.iSchoolId = '".$iSchoolId."' AND lv.eLeaveStatus = 'Approved'
+									");
+									// echo $this->mf_last_query();
+		if ($this->mf_affected_rows() > 0) {
+			while ($rowLeave = $this->mf_fetch_array($selLeave)) {
+				$dFromDate = $rowLeave['dFromDate'];
+				$dToDate = $rowLeave['dToDate'];
+				$aLeaveDateRange = $this->getDatesFromRange($dFromDate,$dToDate);
+
+				foreach((array)$aLeaveDateRange as $dLeaveDate){
+					if (in_array($dLeaveDate, (array)$aDateRangeArr)) {
+						$aLeaveArr[] = array("iLeaveId" => $rowLeave['iLeaveId'], "dDate" => $dLeaveDate, "vLeaveReason" => $rowLeave['vLeaveReason'], "vLeaveType" => $rowLeave['vLeaveType']);
+	
+						$aLeaveDateArr[$dLeaveDate] = array("iLeaveId" => $rowLeave['iLeaveId'], "dDate" => $dLeaveDate, "vLeaveReason" => $rowLeave['vLeaveReason'], "vLeaveType" => $rowLeave['vLeaveType']);
+					}
+				}
+			}
+		}
+
+		$retunArr['aLeaveArr'] = $aLeaveArr;
+		$retunArr['aLeaveDateArr'] = $aLeaveDateArr;
+		$retunArr['iTotLeave'] = count((array)$aLeaveArr);
+
+		// print_r($retunArr);
+		return $retunArr;
+	}
 }
 
 $mfp= new crud(); 

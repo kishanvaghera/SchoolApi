@@ -9,7 +9,7 @@ if($_POST['action']=="addEditRoutine"){
     $iTeacherId=$_POST['iTeacherId'];
     $iClassRoomId=$_POST['iClassRoomId'];
     $iDayId=$_POST['iDayId'];
-    $dstartTime=$_POST['dstartTime'];
+    $dStartTime=$_POST['dStartTime'];
     $dEndTime=$_POST['dEndTime'];
 
     $insArr=array();
@@ -18,23 +18,25 @@ if($_POST['action']=="addEditRoutine"){
     $insArr['iTeacherId']=$iTeacherId;
     $insArr['iClassRoomId']=$iClassRoomId;
     $insArr['iDayId']=$iDayId;
-    $insArr['dstartTime']=$dstartTime;
-    $insArr['dEndTime']=$dEndTime;
+    $insArr['dStartTime']=$mfp->timetosave($dStartTime);
+    $insArr['dEndTime']=$mfp->timetosave($dEndTime);
 
+    // print_r($insArr);
+    // exit;
     $returnArr=array();
     if($iRoutineId>0){
         $insArr['iLastBy']=1;
         $insArr['dLastDate']=$mfp->curTimedate();
         $mfp->mf_dbupdate("class_routine",$insArr," WHERE iRoutineId=".$iRoutineId."");
         $returnArr['status']=200;
-        $returnArr['message']="Class Routine detail has been updated succuessfull.";
+        $returnArr['message']="Class Routine detail has been updated successfully.";
     }else{
         $insArr['iCreatedBy']=1;
         $insArr['iSchoolId']=1;
         $insArr['dCreatedDate']=$mfp->curTimedate();
         $mfp->mf_dbinsert("class_routine",$insArr);
         $returnArr['status']=200;
-        $returnArr['message']="Class Routine has been added succuessfull.";
+        $returnArr['message']="Class Routine has been added successfully.";
     }
 
     echo json_encode($returnArr);
@@ -50,7 +52,7 @@ if($_POST['action']=="addEditRoutine"){
     $selectedField="SELECT iRoutineId as id,iRoutineId,vName,vEmail";
     $singleField="SELECT iRoutineId";
 
-    $sql=" FROM parent WHERE eStatus='y' AND iSchoolId=1 ";
+    $sql=" FROM class_routine WHERE eStatus='y' AND iSchoolId=1 ";
 
     if(!empty($searchString)){
         $sql.=" AND (iRoutineId LIKE '%".$searchString."%' OR
@@ -67,14 +69,14 @@ if($_POST['action']=="addEditRoutine"){
         }
     }
 
-    $sql.=" GROUP BY iParentId ";
+    $sql.=" GROUP BY iRoutineId ";
     
     $sqlSingle=$mfp->mf_query($singleField.$sql);
     $totalSingleRows=$mfp->mf_affected_rows();
     
     $sql.=" limit $page_index, $limit";
 
-
+    echo $selectedField.$sql; exit;
     $sqlQuery=$mfp->mf_query($selectedField.$sql);
 
     $dataArr=array();
